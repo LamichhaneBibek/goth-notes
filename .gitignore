@@ -1,0 +1,4 @@
+components/index_templ.go
+components/not_found_templ.go
+components/note_form_templ.go
+components/notes_templ.go
