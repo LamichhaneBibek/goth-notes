@@ -1,0 +1,35 @@
+package components
+
+import "github.com/LamichhaneBibek/goth-notes/notes"
+import "strconv"
+templ Notes(notes []notes.Note){
+    <ul class="max-w-3xl mx-auto flex flex-wrap gap-[1%]" id="notes">
+        if len( notes ) != 0 {
+            for _, note := range notes {
+                <li class="relative flex flex-col rounded border-2 border-gray-900 p-2 my-4 w-[29%]">
+                    <span class="absolute top-2 right-2 text-red-500 cursor-pointer" hx-trigger="click" hx-delete={ "/note/" + strconv.Itoa(note.Id) } hx-target="#main" hx-swap="innerHTML">
+                        ❌
+                        </span>
+                    <h6 class="text-center">
+                        { note.Title }
+                    </h6>
+                    <div class="border-[2px] border-b-gray-200"> </div>
+                    <p class="text-center"> { note.Body } </p>
+                    <div class="border-[2px] border-b-gray-200"> </div>
+                    <p class="mt-2 text-right"> <span class="text-sm"> Created At: </span> <span class="text-xs text-gray-400"> { note.CreatedAt.Format("2006-01-02 15:04:05") } </span> </p>
+                </li>
+            }
+        } else {
+            <li class="text-center">
+                <p>No notes yet</p>
+            </li>
+        }
+    </ul>
+}
+
+templ NotesPage(notes []notes.Note) {
+    <section class="md:container md:mx-auto">
+        <h2 class="text-xl w-100 text-center">Notes</h2>
+        @Notes(notes)
+    </section>
+}
