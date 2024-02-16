@@ -47,8 +47,8 @@ The Note Taker App is a simple web application built using Golang and the Fiber 
 ## File Structure
 
 - **main.go**: Entry point of the application, contains the server setup and routing.
-- **components/ **: HTML templates for rendering different views.
-- **notes/ **: Package handling note-related logic, including CRUD operations and JSON file interactions.
+- **components/**: HTML templates for rendering different views.
+- **notes/**: Package handling note-related logic, including CRUD operations and JSON file interactions.
 
 ## Notes Storage
 
