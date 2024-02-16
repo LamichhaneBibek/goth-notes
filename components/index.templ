@@ -1,0 +1,37 @@
+package components
+
+templ Index(body templ.Component) {
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap" rel="stylesheet"/>
+        <title>Note Taker 🗒️</title>
+            <style>
+                body {
+                    font-family: 'Space Grotesk', sans-serif;
+                }
+            </style>
+    </head>
+        <body>
+            <div class="2xl:container xl:container lg:container lg:mx-auto">
+                <div class="flex justify-between my-4">
+                    <h1 class="text-2xl cursor-pointer"> <a href="/" >Note Taker 🗒️ </a></h1> 
+                    <ul class="flex justify-between w-max-1/2">
+                        <li class="hover:shadow-md rounded p-2 cursor-pointer" > <a href="/" > Add Note ➕ </a> </li> 
+                        <li class="hover:shadow-md rounded p-2 cursor-pointer"  ><a href="/notes" >Note List 📑 </a></li>
+                    </ul>
+                </div>
+                <main id="main">
+                    @body
+                </main>
+             </div>
+        </body>
+    </html>
+}
