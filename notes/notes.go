@@ -1,7 +1,11 @@
 package notes
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"math/rand"
+	"os"
 	"time"
 )
 
@@ -16,59 +20,114 @@ type CreateNote struct {
 	Body  string `form:"body" json:"body" binding:"required"`
 }
 
-var notes []Note = []Note{
-	{
-		Id:        1,
-		Title:     "To-Do List",
-		Body:      "- Finish this task\n- Schedule meeting with clients\n- Pay bills\n- Go for a walk",
-		CreatedAt: time.Now(),
-	},
-	{
-		Id:        2,
-		Title:     "Book Recommendations",
-		Body:      "- Project Hail Mary by Andy Weir\n- The Martian by Andy Weir\n- Dune by Frank Herbert\n- A Gentleman in Moscow by Amor Towles",
-		CreatedAt: time.Now(),
-	},
-	{
-		Id:        3,
-		Title:     "Movie Ideas",
-		Body:      "- The Banshees of Inisherin\n- Everything Everywhere All at Once\n- The Batman\n- Top Gun: Maverick",
-		CreatedAt: time.Now(),
-	},
-	{
-		Id:        4,
-		Title:     "Inspirational Quotes",
-		Body:      "- \"The only way to do great work is to love what you do.\"\n- Steve Jobs\n- \"The difference between ordinary and extraordinary is that little extra.\"\n- Jimmy Johnson\n- \"Believe you can and you're halfway there.\"\n- Theodore Roosevelt",
-		CreatedAt: time.Now(),
-	},
-	{
-		Id:        5,
-		Title:     "Travel Bucket List",
-		Body:      "- Visit the Great Wall of China\n- Explore the Amazon rainforest\n- See the Northern Lights in Iceland\n- Go on a safari in Africa\n- Hike the Inca Trail to Machu Picchu",
-		CreatedAt: time.Now(),
-	},
-}
+var notes []Note = []Note{}
 
+// GetAll returns all notes from the file in a slice.
 func GetAll() []Note {
-	return notes
+	var tasks []Note
+	// Read the entire file content
+	fileData, err := os.ReadFile("collection.json")
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return tasks // Return empty slice if file doesn't exist
+		}
+		return nil
+	}
+	// Unmarshal the JSON data into the tasks slice
+	if err := json.Unmarshal(fileData, &tasks); err != nil {
+		return nil
+	}
+	return tasks
 }
 
-func Add(n CreateNote) {
-	note := Note{
-		Id:        len(notes),
-		Title:     n.Title,
-		Body:      n.Body,
+// Add appends a new note to the notes slice.
+func Add(note CreateNote) {
+	// Get all existing notes
+	existingNotes := GetAll()
+	// Create a new note
+	newNote := Note{
+		Id:        generateRandom6Digit(),
+		Title:     note.Title,
+		Body:      note.Body,
 		CreatedAt: time.Now(),
 	}
-	notes = append(notes, note)
+	existingNotes = append(existingNotes, newNote)
+	if err := saveNotesToJSON(existingNotes); err != nil {
+		fmt.Println("Error saving notes to JSON:", err)
+	}
 }
 
 func Delete(id int) error {
-	for idx, note := range notes {
+	// Find the index of the note with the specified id
+	index := -1
+	for i, note := range notes {
 		if note.Id == id {
-			notes = append(notes[:idx], notes[idx+1:]...)
-			return nil
+			index = i
+			break
 		}
 	}
-	return fmt.Errorf("Note with id %d not found", id)
+	// If the note with the specified id is not found, return an error
+	if index == -1 {
+		return fmt.Errorf("note with id %d not found", id)
+	}
+	// Remove the note from the notes slice
+	notes = append(notes[:index], notes[index+1:]...)
+	// Save the updated notes to the JSON file
+	if err := saveNotesToJSON(notes); err != nil {
+		return err
+	}
+	return nil
+}
+
+func saveNotesToJSON(notes []Note) error {
+	// Specify the path to the JSON file
+	filePath := "collection.json"
+	// Serialize notes to JSON
+	serializedNotes, err := json.MarshalIndent(notes, "", "  ")
+	if err != nil {
+		return err
+	}
+	// Write JSON data to the file
+	err = os.WriteFile(filePath, serializedNotes, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func InitializeNotes() {
+	// Specify the path to the JSON file
+	filePath := "collection.json"
+	// Load notes from the JSON file
+	loadedNotes, err := loadNotesFromJSON(filePath)
+	if err != nil {
+		// Handle the error, e.g., log it or initialize with an empty slice
+		notes = make([]Note, 0)
+		return
+	}
+	// Set the global 'notes' variable with the loaded notes
+	notes = loadedNotes
+}
+
+func loadNotesFromJSON(filePath string) ([]Note, error) {
+	var loadedNotes []Note
+	// Read JSON data from the file
+	fileData, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+	// Deserialize JSON data into the notes slice
+	err = json.Unmarshal(fileData, &loadedNotes)
+	if err != nil {
+		return nil, err
+	}
+	return loadedNotes, nil
+}
+func generateRandom6Digit() int {
+	// Set the range for a 6-digit number (100000 to 999999)
+	min := 100000
+	max := 999999
+	// Generate a random number within the specified range
+	random6Digit := min + rand.Intn(max-min+1)
+	return random6Digit
 }
